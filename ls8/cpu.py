@@ -47,7 +47,7 @@ class CPU:
         # TODO
         pass
 
-    def hault(self):
+    def HLT(self):
         print('System exiting...')
         sys.exit(1)
 
@@ -91,7 +91,7 @@ class CPU:
         while running:
             IR = self.ram_read(self.pc)
             if IR == 0b00000001:
-                self.hault()
+                self.HLT()
             elif IR == 0b01000111:
                 self.prnt()
             elif IR == 0b10000010:
