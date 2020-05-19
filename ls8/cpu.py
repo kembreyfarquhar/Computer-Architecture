@@ -11,6 +11,12 @@ class CPU:
         self.reg = [0] * 8
         self.pc = 0
 
+        self.branchtable = {}
+        self.branchtable[130] = self.LDI
+        self.branchtable[71] = self.prnt
+        self.branchtable[162] = self.mul
+        self.branchtable[1] = self.HLT
+
     def load(self, path):
         """Load a program into memory."""
 
@@ -27,7 +33,8 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         #AND, CMP, DEC, DIV, INC, MOD, MUL, NOT, OR, SHL, SHR, SUB, XOR
         else:
             raise Exception("Unsupported ALU operation")
@@ -55,6 +62,10 @@ class CPU:
     def ram_write(self, MDR, MAR):
         self.ram[MAR] = MDR
 
+    def mul(self):
+        self.alu("MUL", self.ram_read(self.pc+1), self.ram_read(self.pc+2))
+        self.pc += 3
+
     def trace(self):
         """
         Handy function to print out the CPU state. You might want to call this
@@ -80,12 +91,11 @@ class CPU:
 
         while running:
             IR = self.ram_read(self.pc)
-            if IR == 0b00000001:
-                self.HLT()
-            elif IR == 0b01000111:
-                self.prnt()
-            elif IR == 0b10000010:
-                self.LDI()
+            if IR == 1:
+                self.branchtable[IR]()
+                break
+            elif IR in self.branchtable:
+                self.branchtable[IR]()
             else:
                 print(f'unknown instruction {IR} at address {self.pc}')
                 sys.exit(1)
